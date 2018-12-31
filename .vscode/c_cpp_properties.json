@@ -1,0 +1,13 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": ["{workspaceFolder}"],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ]
+        }
+    ],
+    "version": 4
+}
