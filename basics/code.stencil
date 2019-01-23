@@ -1,0 +1,97 @@
+import ObjectMapper
+import SwiftyJSON
+
+{% for type in types.implementing.AutoMappable|struct %}
+// MARK: {{ type.name }} Mappable
+extension {{type.name}}: Mappable {
+    init?(map: Map) {
+        let json = JSON(map.JSON)
+    {% for variable in type.storedVariables %}
+        // MARK: {{ variable.typeName }}
+        {%if not variable.typeName.isOptional %}
+        {% if variable.name == "status" %}
+        self.{{variable.name}} = 1
+        {% elif variable.name == "message" %}
+        self.{{variable.name}} = ""
+        {% else %}
+        {% if variable.typeName.isArray %}
+        self.{{variable.name}} = json["{{variable.name}}"].arrayObject as? {{ variable.typeName }} ?? []
+        {% elif variable.typeName.name == "String" %}
+        self.{{variable.name}} = json["{{variable.name}}"].stringValue
+        {% elif variable.typeName.name == "Double" %}
+        self.{{variable.name}} = json["{{variable.name}}"].doubleValue
+        {% elif variable.typeName.name == "Float" %}
+        self.{{variable.name}} = json["{{variable.name}}"].floatValue
+        {% elif variable.typeName.name == "Int" %}
+        self.{{variable.name}} = json["{{variable.name}}"].intValue
+        {% elif variable.typeName.name == "Bool" %}
+        self.{{variable.name}} = json["{{variable.name}}"].boolValue
+        {% elif variable.typeName.isDictionary %}
+        self.{{variable.name}} = json["{{variable.name}}"].dictionaryObject
+        {% elif variable.type.kind == "struct" %}
+        self.{{variable.name}} = {{variable.typeName}}()
+        {% elif variable.type.kind == "enum" %}
+        {% else %}
+        self.{{variable.name}} = map.JSON["{{variable.name}}"] as? {{ variable.typeName }} ?? ""
+        {%endif%}
+        {%endif%}
+        {% else %}
+        self.{{variable.name}} = nil
+        {%endif%}
+    {% endfor %}
+    }
+    mutating func mapping(map: Map) {
+    {% for variable in type.storedVariables %}
+        {{variable.name}} <- map["{{variable.name}}"]
+    {% endfor %}
+    }
+}
+
+{% for type in types.implementing.AutoMappable|class %}
+// MARK: {{ type.name }} Mappable
+extension {{type.name}}: Mappable {
+
+    required init?(map: Map) {
+        let json = JSON(map.JSON)
+    {% for variable in type.storedVariables %}
+        // MARK: {{ variable.typeName }}
+        {%if not variable.typeName.isOptional %}
+        {% if variable.name == "status" %}
+        self.{{variable.name}} = 1
+        {% elif variable.name == "message" %}
+        self.{{variable.name}} = ""
+        {% else %}
+        {% if variable.typeName.isArray %}
+        self.{{variable.name}} = json["{{variable.name}}"].arrayObject as? {{ variable.typeName }} ?? []
+        {% elif variable.typeName.name == "String" %}
+        self.{{variable.name}} = json["{{variable.name}}"].stringValue
+        {% elif variable.typeName.name == "Double" %}
+        self.{{variable.name}} = json["{{variable.name}}"].doubleValue
+        {% elif variable.typeName.name == "Float" %}
+        self.{{variable.name}} = json["{{variable.name}}"].floatValue
+        {% elif variable.typeName.name == "Int" %}
+        self.{{variable.name}} = json["{{variable.name}}"].intValue
+        {% elif variable.typeName.name == "Bool" %}
+        self.{{variable.name}} = json["{{variable.name}}"].boolValue
+        {% elif variable.typeName.isDictionary %}
+        self.{{variable.name}} = json["{{variable.name}}"].dictionaryObject
+        {% elif variable.type.kind == "struct" %}
+        self.{{variable.name}} = {{variable.typeName}}()
+        {% elif variable.type.kind == "enum" %}
+        {% else %}
+        self.{{variable.name}} = map.JSON["{{variable.name}}"] as? {{ variable.typeName }} ?? ""
+        {%endif%}
+        {%endif%}
+        {% else %}
+        self.{{variable.name}} = nil
+        {%endif%}
+    {% endfor %}
+    }
+    
+    func mapping(map: Map) {
+    {% for variable in type.storedVariables %} 
+        {{variable.name}} <- map["{{variable.name}}"]
+    {% endfor %}
+    }
+}
+{% endfor %}
